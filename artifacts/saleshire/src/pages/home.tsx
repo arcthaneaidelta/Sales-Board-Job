@@ -1,22 +1,38 @@
-import { ArrowRight, CheckCircle2, ChevronRight, CircleDot, Target } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronRight, CircleDot, MapPin, Search } from 'lucide-react';
+import { useState } from 'react';
 import { useListJobs } from '@workspace/api-client-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { PageFrame, SectionKicker } from '@/components/layout';
 import { JobCard } from '@/components/job-card';
 
 export default function Home() {
+  const [, setLocation] = useLocation();
+  const [keyword, setKeyword] = useState('');
+  const [location, setSearchLocation] = useState('');
   const jobsQuery = useListJobs({ status: 'Approved' });
   const jobs = jobsQuery.data ?? [];
+  const submitSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    if (keyword.trim()) params.set('search', keyword.trim());
+    if (location.trim()) params.set('location', location.trim());
+    setLocation(`/prace${params.toString() ? `?${params.toString()}` : ''}`);
+  };
   return (
     <PageFrame>
       <section className="hero">
         <div className="hero-copy">
           <SectionKicker>Český marketplace pro sales</SectionKicker>
-          <h1>Najděte si práci,<br /><em>ve které se počítá</em> váš tah na branku.</h1>
-          <p className="hero-lede">Kurátorované obchodní role od firem, které vědí, že dobrý prodej začíná dobrými lidmi.</p>
+          <h1>Najděte svou další<br /><em>sales pozici.</em></h1>
+          <p className="hero-lede">SalesHire je jednoduchý pracovní portál zaměřený výhradně na obchod a business development v Česku.</p>
+          <form className="hero-search" onSubmit={submitSearch}>
+            <label className="hero-search-field"><Search size={17} /><input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Pozice nebo klíčové slovo" aria-label="Pozice nebo klíčové slovo" /></label>
+            <label className="hero-search-field"><MapPin size={17} /><input value={location} onChange={(event) => setSearchLocation(event.target.value)} placeholder="Město nebo region" aria-label="Město nebo region" /></label>
+            <button className="btn btn-primary" type="submit" data-testid="button-hero-search">Hledat <ArrowRight size={17} /></button>
+          </form>
           <div className="hero-actions">
             <Link href="/prace" className="btn btn-primary" data-testid="link-hero-jobs">Prohlédnout pozice <ArrowRight size={17} /></Link>
-            <Link href="/zadat-pozici" className="btn btn-secondary" data-testid="link-hero-submit">Hledám obchodníka</Link>
+            <Link href="/zadat-pozici" className="btn btn-secondary" data-testid="link-hero-submit">Zadat pozici zdarma</Link>
           </div>
           <div className="hero-proof"><span><CheckCircle2 size={16} />Bez registrace</span><span><CheckCircle2 size={16} />Ověřené nabídky</span></div>
         </div>
@@ -28,8 +44,8 @@ export default function Home() {
             <span className="panel-line" />
             <span className="panel-caption">Praha · Brno · Remote</span>
           </div>
-          <div className="float-note note-one"><CircleDot size={14} /> 12 nových pozic</div>
-          <div className="float-note note-two"><Target size={14} /> 4 obory</div>
+          <div className="float-note note-one"><CircleDot size={14} /> Ověřené nabídky</div>
+          <div className="float-note note-two"><CircleDot size={14} /> Bez registrace</div>
         </div>
       </section>
 
