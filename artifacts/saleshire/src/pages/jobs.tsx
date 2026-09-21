@@ -12,7 +12,7 @@ export default function Jobs() {
   const [searchLocation, setSearchLocation] = useState(initialParams.get('location') ?? '');
   const [workType, setWorkType] = useState('');
   const query = useListJobs({ status: 'Approved', search: search || undefined, location: searchLocation || undefined, workType: (workType || undefined) as 'Remote' | 'Hybrid' | 'On-site' | undefined });
-  const jobs = useMemo(() => query.data ?? [], [query.data]);
+  const jobs = useMemo(() => (Array.isArray(query.data) ? query.data : []), [query.data]);
   return (
     <PageFrame wide>
       <section className="list-page-head"><div><SectionKicker>Volná místa</SectionKicker><h1>Najděte si další<br /><em>dobrou roli.</em></h1><p>Vybrané sales pozice z českých firem. Bez balastu, s dostatkem informací.</p></div><div className="list-stat"><strong>{query.data?.length ?? '—'}</strong><span>schválených<br />pozic</span></div></section>

@@ -10,7 +10,7 @@ export default function Home() {
   const [keyword, setKeyword] = useState('');
   const [location, setSearchLocation] = useState('');
   const jobsQuery = useListJobs({ status: 'Approved' });
-  const jobs = jobsQuery.data ?? [];
+  const jobs = Array.isArray(jobsQuery.data) ? jobsQuery.data : [];
   const submitSearch = (event: React.FormEvent) => {
     event.preventDefault();
     const params = new URLSearchParams();

@@ -1,3 +1,5 @@
+import { handleMockApi } from "./mock-api";
+
 export type CustomFetchOptions = RequestInit & {
   responseType?: "json" | "text" | "blob" | "auto";
 };
@@ -360,12 +362,35 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  try {
+    const response = await fetch(input, { ...init, method, headers });
 
-  if (!response.ok) {
-    const errorData = await parseErrorBody(response, method);
-    throw new ApiError(response, errorData, requestInfo);
+    const contentType = response.headers.get("content-type") || "";
+    // If Netlify or another static host rewrote /api/* to index.html (content-type text/html),
+    // or if the server returned 404 for an API route:
+    if (
+      requestInfo.url.includes("/api/") &&
+      (contentType.includes("text/html") || response.status === 404)
+    ) {
+      const mockResult = await handleMockApi(method, requestInfo.url, init.body);
+      if (mockResult !== null) {
+        return mockResult as T;
+      }
+    }
+
+    if (!response.ok) {
+      const errorData = await parseErrorBody(response, method);
+      throw new ApiError(response, errorData, requestInfo);
+    }
+
+    return (await parseSuccessBody(response, responseType, requestInfo)) as T;
+  } catch (err) {
+    if (requestInfo.url.includes("/api/")) {
+      const mockResult = await handleMockApi(method, requestInfo.url, init.body);
+      if (mockResult !== null) {
+        return mockResult as T;
+      }
+    }
+    throw err;
   }
-
-  return (await parseSuccessBody(response, responseType, requestInfo)) as T;
 }
