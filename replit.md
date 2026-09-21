@@ -1,6 +1,6 @@
-# [Project name]
+# SalesHire Job Board
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+SalesHire is a Czech-language sales recruitment marketplace with public job browsing, no-account applications, employer submissions, and admin moderation.
 
 ## Run & Operate
 
@@ -22,23 +22,37 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/saleshire/src/App.tsx` — route shell and frontend entry
+- `artifacts/saleshire/src/pages/` — homepage, listings, detail/application, employer, submission, and admin screens
+- `artifacts/saleshire/src/components/` — shared layout, job cards, and UI primitives
+- `artifacts/api-server/src/routes/` — jobs, applications, admin summary, and health endpoints
+- `lib/db/src/schema/index.ts` — Companies, Jobs, and Applications tables
+- `lib/api-spec/openapi.yaml` — source of truth for API contracts and generated hooks
+- `artifacts/saleshire/src/index.css` — SalesHire visual theme and responsive styles
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Public candidate and employer flows do not require accounts.
+- Job submissions start as `Pending`; only `Approved` jobs are shown publicly.
+- The admin screen uses the same API mutations to approve, reject, edit, and delete jobs.
+- Demo records are seeded on first API startup so the product is immediately reviewable.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Czech landing page with approved job highlights and employer CTA.
+- Live search and filters for location and work type.
+- Job detail pages with a no-account application form.
+- Public employer job submission with a clear moderation handoff.
+- Admin dashboard with status filters, summary counts, moderation controls, and applications list.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep the product simple, maintainable, and focused on the sales hiring workflow.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Regenerate the API client after changing `lib/api-spec/openapi.yaml`.
+- Use the managed `artifacts/api-server: API Server` and `artifacts/saleshire: web` workflows for local previews.
 
 ## Pointers
 

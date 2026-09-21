@@ -10,6 +10,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: jobs
+    description: Job listings and moderation
+  - name: applications
+    description: Candidate applications
+  - name: admin
+    description: Admin overview
 paths:
   /healthz:
     get:
@@ -24,6 +30,159 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List jobs
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: workType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [Remote, Hybrid, On-site]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [Pending, Approved, Rejected]
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Submit a job for review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateJob
+      tags: [jobs]
+      summary: Update a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+    delete:
+      operationId: deleteJob
+      tags: [jobs]
+      summary: Delete a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+  /applications:
+    get:
+      operationId: listApplications
+      tags: [applications]
+      summary: List applications
+      responses:
+        "200":
+          description: Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+    post:
+      operationId: createApplication
+      tags: [applications]
+      summary: Submit a candidate application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+  /admin/summary:
+    get:
+      operationId: getAdminSummary
+      tags: [admin]
+      summary: Get admin summary
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSummary"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +192,164 @@ components:
           type: string
       required:
         - status
+    Company:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        website:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+    Job:
+      type: object
+      required: [id, title, company, location, workType, description, requirements, contactEmail, status, datePosted]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        company:
+          $ref: "#/components/schemas/Company"
+        location:
+          type: string
+        workType:
+          type: string
+          enum: [Remote, Hybrid, On-site]
+        salary:
+          type: ["string", "null"]
+        description:
+          type: string
+        requirements:
+          type: string
+        benefits:
+          type: ["string", "null"]
+        contactEmail:
+          type: string
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected]
+        datePosted:
+          type: string
+          format: date-time
+        applicationCount:
+          type: integer
+    JobInput:
+      type: object
+      required: [companyName, title, location, workType, description, requirements, contactEmail]
+      properties:
+        companyName:
+          type: string
+          minLength: 1
+        companyWebsite:
+          type: ["string", "null"]
+        title:
+          type: string
+          minLength: 1
+        location:
+          type: string
+          minLength: 1
+        workType:
+          type: string
+          enum: [Remote, Hybrid, On-site]
+        salary:
+          type: ["string", "null"]
+        description:
+          type: string
+          minLength: 1
+        requirements:
+          type: string
+          minLength: 1
+        benefits:
+          type: ["string", "null"]
+        contactEmail:
+          type: string
+          format: email
+        companyContactEmail:
+          type: ["string", "null"]
+    JobUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected]
+        title:
+          type: string
+        location:
+          type: string
+        workType:
+          type: string
+          enum: [Remote, Hybrid, On-site]
+        salary:
+          type: ["string", "null"]
+        description:
+          type: string
+        requirements:
+          type: string
+        benefits:
+          type: ["string", "null"]
+    Application:
+      type: object
+      required: [id, jobId, jobTitle, companyName, name, email, phone, linkedinUrl, message, dateApplied]
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        jobTitle:
+          type: string
+        companyName:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        cvFileName:
+          type: ["string", "null"]
+        message:
+          type: ["string", "null"]
+        dateApplied:
+          type: string
+          format: date-time
+    ApplicationInput:
+      type: object
+      required: [jobId, name, email]
+      properties:
+        jobId:
+          type: integer
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        phone:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        cvFileName:
+          type: ["string", "null"]
+        message:
+          type: ["string", "null"]
+    AdminSummary:
+      type: object
+      required: [totalJobs, pendingJobs, approvedJobs, rejectedJobs, totalApplications]
+      properties:
+        totalJobs:
+          type: integer
+        pendingJobs:
+          type: integer
+        approvedJobs:
+          type: integer
+        rejectedJobs:
+          type: integer
+        totalApplications:
+          type: integer
 

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "SalesHire Job Board"
+description = "A Czech-language sales recruitment marketplace with searchable approved jobs, no-account applications, employer submissions, and an admin moderation workflow."
+version = "1.0.0"
+id = "artifacts/saleshire"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24876
+
+[services.development]
+run = "pnpm --filter @workspace/saleshire run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/saleshire", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/saleshire/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24876"
+BASE_PATH = "/"

@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { seedDemoData } from "./lib/seed";
 
 const app: Express = express();
 
@@ -30,5 +31,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+void seedDemoData().catch((error: unknown) => {
+  logger.error({ err: error }, "Unable to seed SalesHire demo data");
+});
 
 export default app;

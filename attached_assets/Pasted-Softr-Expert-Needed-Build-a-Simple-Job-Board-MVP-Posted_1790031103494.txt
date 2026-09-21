@@ -1,0 +1,146 @@
+Softr Expert Needed – Build a Simple Job Board MVP
+Posted 1 hour ago
+Worldwide
+
+Summary
+I am looking for an experienced Softr freelancer to build a simple MVP job board called SalesHire.
+
+SalesHire is a niche job marketplace focused on sales and business development positions. The goal is to launch a simple, professional MVP and validate the business before investing in more advanced features.
+
+PLATFORM
+- Softr
+- Prefer native Softr Database and native Softr blocks
+- Avoid custom code / Vibe Coding unless absolutely necessary
+- The project must remain easy to maintain by another freelancer later
+
+LANGUAGE
+- The entire user-facing website must be in Czech
+- Internal database field names can be in English
+
+MAIN PAGES
+1. Homepage
+2. Job listings
+3. Job detail
+4. Candidate application
+5. For Employers
+6. Submit a Job
+7. Simple Admin area
+
+HOMEPAGE
+- Clean, modern and professional design
+- Hero section: "Najděte svou další sales pozici."
+- Short explanation of SalesHire
+- Search by job title/keyword and location
+- CTA to browse jobs
+- CTA for employers to submit a job
+- Section with latest job listings
+- No fake statistics, fake testimonials or unnecessary marketing content
+
+JOB LISTINGS
+Each job should show:
+- Job title
+- Company
+- Location
+- Remote / Hybrid / On-site
+- Salary (if provided)
+- Short description
+- Date posted
+
+Basic search/filtering by keyword and location.
+
+JOB DETAIL
+- Full job description
+- Requirements
+- Salary
+- Location
+- Work type
+- Company
+- "Apply" button
+
+CANDIDATE APPLICATION
+Candidates must be able to apply WITHOUT creating an account.
+
+Application form:
+- Name
+- Email
+- Phone
+- LinkedIn profile
+- CV upload
+- Short message
+
+EMPLOYER JOB SUBMISSION
+Employers do NOT need to create an account.
+
+Form:
+- Company name
+- Company website
+- Job title
+- Location
+- Remote / Hybrid / On-site
+- Salary
+- Job description
+- Requirements
+- Benefits (optional)
+- Contact email
+
+IMPORTANT WORKFLOW:
+Employer submits job → job gets "Pending" status → Admin reviews it → Admin approves or rejects it → only approved jobs are publicly visible.
+
+ADMIN
+Admin should be able to:
+- View submitted jobs
+- Approve / reject jobs
+- Edit / delete jobs
+- View applications
+- View uploaded CVs
+- Manage basic job statuses
+
+DATABASE
+Simple structure is sufficient:
+- Companies
+- Jobs
+- Applications
+
+No complex ATS functionality is required.
+
+NOTIFICATIONS
+If simple to implement:
+- Admin receives notification when a new job is submitted
+- Employer receives notification when a candidate applies
+
+DESIGN
+- Minimalistic
+- Modern
+- Professional
+- Clean
+- Trustworthy
+- Blue/white style
+- Fully responsive on desktop and mobile
+- Existing SalesHire logo will be provided
+
+IMPORTANT – DO NOT ADD:
+- AI matching
+- ATS
+- Chat
+- Candidate accounts
+- Employer accounts
+- Subscriptions
+- Payment system
+- Complex dashboards
+- Native mobile app
+- Advanced analytics
+- Unnecessary integrations
+
+This is intentionally a simple MVP. Please do not overengineer it.
+
+OWNERSHIP
+The Softr account, database and project must remain under my ownership. I will provide access to my account/workspace. The freelancer should not build the project under their own account.
+
+DELIVERABLE
+A fully functional SalesHire MVP deployed on my custom domain saleshire.cz, with all workflows tested and a short handover explaining how I can manage jobs and applications.
+
+Please provide:
+1. Fixed project price
+2. Estimated timeline
+3. Examples of previous Softr projects
+4. Brief description of your experience with Softr

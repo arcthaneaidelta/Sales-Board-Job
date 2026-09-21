@@ -1,0 +1,366 @@
+# SalesHire.cz — Softr MVP Job Board
+## Implementation-Ready Product Requirements Document
+
+**Platform:** Softr (native blocks + native Softr Database only, no custom code unless unavoidable)
+**Language:** Czech (UI), English (internal field names)
+**Prepared for:** Client bidding / proposal demo + build spec
+
+---
+
+## 1. Client Requirements → Demo Strategy
+
+| Client asked for | How it's demonstrated | Interaction that proves it | Why it impresses |
+|---|---|---|---|
+| Simple, professional MVP job board, Czech UI | Full Czech copy, blue/white minimal design system, 7 working pages | Client clicks through homepage → listings → detail → apply | Feels like a real, live product on day one, not a mockup |
+| No-account application flow | Public "Podat žádost" form on job detail | Candidate fills form, uploads CV, gets confirmation — no login | Removes friction; matches brief exactly |
+| No-account employer submission | Public "Zadat pozici" form | Employer submits, sees "Čeká na schválení" state | Shows the moderation loop working end-to-end |
+| Pending → Admin approve/reject → public visibility | Admin view (Softr User List block) with status field and Approve/Reject actions | Admin toggles status, job appears/disappears from public list live | This is the core business logic — proving it works is the single biggest trust signal |
+| Search by title/keyword + location | Search bar + filter block on listings page | Typing a keyword live-filters the list | Shows real functional search, not decoration |
+| Notifications (if simple) | Softr's built-in "Notify by email" automation on record create/update | Admin gets email on new submission; employer gets email on new application | Low-effort, high-perceived-value feature |
+| No overengineering (no ATS, accounts, payments, chat) | Deliberately absent from IA and component list | N/A | Signals the freelancer understood scope discipline, not just design skill |
+| Ownership stays with client | Build instructions specify working inside client's own Softr workspace from day one | N/A | Addresses a stated concern directly — builds trust before work even starts |
+
+**Recommended Enhancement (not required, worth proposing):** A lightweight "Uloženo" (saved) local-state bookmark on job cards using Softr's browser-local favorites feature — zero backend cost, nice polish, easy to cut if client says no.
+
+**Recommended Enhancement:** Simple status badge colors (Pending = amber, Approved = green, Rejected = grey) in Admin list for instant scanability.
+
+---
+
+## 2. Demo Purpose & Scope
+
+This is a **working Softr build**, not a coded frontend prototype — the deliverable itself doubles as the demo. Everything below should be buildable natively in Softr's Database + Blocks + Lists + Forms + native Automations. Custom code (Custom Code block / API) is used **only** where a native Softr block genuinely cannot do the job (flagged explicitly where relevant), consistent with the client's "avoid custom code" instruction.
+
+**Build:** all 7 pages fully wired to a real Softr Database, real forms, real record statuses, real filtering, real automations for email notifications.
+
+**Do not build:** authentication/accounts of any kind, payments, AI matching, chat, analytics dashboards, native app — these are explicitly excluded by the client.
+
+---
+
+## 3. Visual Design System
+
+### Color System
+Blue/white, minimal, trustworthy — appropriate for a professional B2B/B2C sales-recruitment marketplace where both employers and candidates need to feel this is credible, not gimmicky.
+
+| Token | Hex | Use |
+|---|---|---|
+| Primary | `#1E4FD6` | Primary buttons, links, active nav |
+| Primary Hover | `#173FA8` | Button/link hover |
+| Secondary | `#0B1D3A` | Headlines, footer background |
+| Accent | `#2FA8E0` | Badges, tags (Remote/Hybrid), highlights |
+| Background | `#FFFFFF` | Page background |
+| Surface | `#F6F8FC` | Section backgrounds, card fill |
+| Elevated Surface | `#FFFFFF` with shadow | Cards on light background |
+| Text Primary | `#101828` | Body headings |
+| Text Secondary | `#475467` | Body copy |
+| Muted Text | `#98A2B3` | Meta info (dates, labels) |
+| Border | `#E4E7EC` | Card borders, dividers |
+| Success | `#12B76A` | Approved status, success toasts |
+| Warning | `#F79009` | Pending status |
+| Error | `#F04438` | Rejected status, form errors |
+| Info | `#2FA8E0` | Info banners |
+
+Rationale: a restrained blue conveys reliability (finance/recruitment adjacent trust cues) without leaning into "tech startup neon." White space keeps it calm and readable for people scanning job listings for long periods.
+
+### Typography
+- **Family:** Inter (or Softr's built-in "Inter"/"Manrope") — clean, highly legible, professional, free, native-supported in Softr's font picker.
+- H1: 40–48px / 600 weight / -0.02em tracking
+- H2: 28–32px / 600 weight
+- H3: 20–22px / 600 weight
+- Body: 16px / 400 / 1.5 line-height
+- Small/meta: 13–14px / 500, `Muted Text` color
+- Buttons: 15px / 600, slight letter-spacing (0.01em)
+
+### Spacing Scale
+4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96px — use Softr's section padding presets mapped to these.
+
+### Border Radius
+- Buttons/inputs: 8px
+- Cards: 12px
+- Badges/pills: 999px (full)
+
+### Shadows
+Single subtle elevation only: `0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.10)` on cards on hover. No stacked/glow shadows.
+
+### Iconography
+Softr's built-in icon set (Feather-style outline icons) for: location pin, briefcase, clock, remote/hybrid/onsite, upload, search, checkmark, arrow. Consistent stroke-based, no filled/glossy icons.
+
+---
+
+## 4. Information Architecture / Sitemap
+
+```
+SalesHire.cz
+├── Homepage (/)
+├── Job Listings (/prace)
+├── Job Detail (/prace/[job])
+├── Candidate Application (embedded form on Job Detail, or /prihlaska/[job])
+├── For Employers (/pro-zamestnavatele)
+├── Submit a Job (/zadat-pozici)
+└── Admin (/admin — restricted to client via Softr User Group, not public)
+```
+
+---
+
+## 5. Screen-by-Screen Specification
+
+### 5.1 Homepage
+**Purpose:** Convert two audiences fast — job seekers to browse, employers to post.
+**Layout:** Softr Header block → Hero → Search bar → Latest Jobs List block → How-it-works micro-section → Employer CTA band → Footer.
+
+- **Header:** Logo left, nav (Práce / Pro zaměstnavatele / Zadat pozici), sticky on scroll, white bg with subtle bottom border on scroll (native Softr sticky header option).
+- **Hero:**
+  - H1: "Najděte svou další sales pozici."
+  - Subcopy: "SalesHire je jednoduchý pracovní portál zaměřený výhradně na obchodní a sales pozice v Česku."
+  - Search block: keyword input + location input + "Hledat" button (Softr Search/Filter block wired to Jobs list on `/prace`)
+  - Primary CTA: "Procházet pozice" → `/prace`
+  - Secondary CTA (smaller, secondary button style): "Zadat pozici zdarma" → `/zadat-pozici`
+  - Background: solid `Surface` color or a single soft geometric shape — **no stock photography of "smiling businesspeople," no gradients, no particles.**
+- **Latest Jobs section:** Softr List block, 4–6 most recent Approved jobs, each a Job Card (see Component Inventory), "Zobrazit všechny pozice" link below.
+- **How it works (3-step):** short icon + one-line text: 1) Vyberte pozici, 2) Podejte žádost bez registrace, 3) Ozveme se vám. Purely informational, no animation needed beyond native scroll-fade (Softr's built-in reveal-on-scroll toggle, subtle, 200ms).
+- **Employer CTA band:** dark `Secondary` background full-width strip: "Hledáte obchodníka? Zveřejněte pozici do 5 minut." + button.
+- **Footer:** logo, nav links, contact email, "© SalesHire" — simple, no fake social proof.
+
+**States:** Empty state for Latest Jobs (if zero approved jobs exist yet) → friendly message "Momentálně nemáme žádné aktivní pozice. Zkuste to prosím později." Not a broken empty list.
+
+**Mobile:** hero stacks vertically, search fields stack full-width, nav collapses into Softr's native mobile hamburger menu.
+
+---
+
+### 5.2 Job Listings (`/prace`)
+**Purpose:** Let candidates browse and filter approved jobs.
+**Layout:** Page header ("Otevřené pozice") → Filter bar (sticky under header on desktop) → Job Card list (Softr List block, filtered to Status = Approved) → Softr pagination.
+
+**Filter bar:** keyword text search, location dropdown (or text), work-type filter (Remote/Hybrid/On-site — Softr Filter block using a Jobs field). Filters apply live via Softr's native list filtering — no page reload.
+
+**Job Card contents (each row):**
+- Job title (bold, links to detail)
+- Company name + (optional) company logo thumbnail
+- Location + work-type pill badge (colored per Accent)
+- Salary (if provided — otherwise hidden, never shows "N/A")
+- Short description (1–2 line truncation)
+- "Zveřejněno [date]" in muted text
+- Whole card is clickable → Job Detail
+
+**States:**
+- Loading: Softr's native list loading skeleton
+- Empty (no results matching filter): "Pro tento výběr jsme nenašli žádné pozice. Zkuste upravit filtry." + "Zrušit filtry" button
+- Error: not applicable at Softr-native level (handled by platform), but if using any custom code integration, show a simple inline error banner
+
+**Mobile:** filter bar collapses into a "Filtrovat" button opening a bottom sheet (Softr native filter drawer on mobile), cards stack full-width single column.
+
+---
+
+### 5.3 Job Detail (`/prace/[job]`)
+**Purpose:** Give full context and convert to application.
+**Layout:** Back link → Header block (title, company, location, work-type, salary, posted date) → Sticky "Podat žádost" CTA (desktop: right rail; mobile: sticky bottom bar) → Full description → Requirements (bulleted) → Benefits (if provided) → Company blurb → Apply form (or link to a dedicated apply block).
+
+**Interactions:**
+- "Podat žádost" scrolls to/opens application form (inline expand preferred over new page, to reduce friction — Softr Accordion or in-page anchor scroll).
+- Company website, if provided, opens in new tab.
+
+**States:** if job somehow isn't Approved (e.g. shared link before approval) → detail page shows "Tato pozice již není dostupná." instead of content (Softr conditional visibility rule on Status field).
+
+---
+
+### 5.4 Candidate Application (in-page on Job Detail)
+**Purpose:** Frictionless, no-account application.
+**Form fields:** Jméno, Email, Telefon, LinkedIn profil, CV (Softr file upload block, PDF/DOC), Krátká zpráva (textarea).
+
+**Flow:**
+- Default → user fills form
+- Validation: required = Jméno, Email, CV; inline error text under field in `Error` red, Softr native form validation
+- Submit → Loading (button shows spinner + "Odesílání…", disabled)
+- Success → form replaced by a clean confirmation panel: checkmark icon + "Děkujeme! Vaše žádost byla odeslána. Ozveme se vám, pokud budete vybráni." (Softr native "after submit" success state)
+- Error (upload fails / network) → inline banner: "Něco se nepovedlo. Zkuste to prosím znovu." with retry
+- On submit, record created in **Applications** table linked to the Job record; triggers employer-notification automation (see §8).
+
+---
+
+### 5.5 For Employers (`/pro-zamestnavatele`)
+**Purpose:** Reassure employers, funnel to Submit a Job.
+**Layout:** Hero ("Najměte svého dalšího top obchodníka.") → 3-step process (Zadejte pozici → My ji schválíme → Získáváte kandidáty) → Simple pricing/value note (per client's MVP, likely "Zdarma" for now, or left as TBD copy block easy to edit later) → CTA "Zadat pozici" → FAQ (2–4 short Q&As: "Musím se registrovat?" "Jak dlouho trvá schválení?" etc.) → Footer.
+
+No fake testimonials or logos, per explicit client instruction.
+
+---
+
+### 5.6 Submit a Job (`/zadat-pozici`)
+**Purpose:** Employer job submission, no account.
+**Form fields:** Název společnosti, Web společnosti, Název pozice, Lokalita, Typ práce (Remote/Hybrid/On-site — dropdown), Mzda, Popis pozice, Požadavky, Benefity (nepovinné), Kontaktní email.
+
+**Flow:**
+- Validation: required = company name, job title, location, work type, description, contact email
+- Submit → Loading state (same pattern as candidate form)
+- Success state: "Děkujeme! Vaše pozice byla odeslána ke schválení. Po schválení bude viditelná na webu." — sets clear expectation that it is NOT instantly live (important trust-building copy given the moderation workflow)
+- On submit: creates record in **Jobs** table with `Status = Pending`, links/creates a **Companies** record if new, triggers admin-notification automation.
+
+---
+
+### 5.7 Admin Area (`/admin`, restricted via Softr User Group / password-protected page — not public nav)
+**Purpose:** Review, approve/reject, manage.
+**Layout:** Simple Softr native "User List" or "Records List" block with:
+- Tabs or filter: Vše / Čeká na schválení / Schváleno / Zamítnuto
+- Table columns: Název pozice, Společnost, Datum, Status (colored badge), Akce (Schválit / Zamítnout buttons — Softr native "Update record" action buttons, no custom code needed)
+- Click row → detail panel/drawer showing full job content, edit fields inline, delete option
+- Second tab/page: **Applications** list — company/job, candidate name, email, phone, LinkedIn, CV file (clickable download link), submitted date
+
+**Interactions:** Approve/Reject are single-click Softr native button actions that update the `Status` field directly — this *is* the entire moderation workflow, fully native, zero custom code.
+
+---
+
+## 6. Realistic Mock Data (for the demo build)
+
+**Companies:** Alza.cz, Rohlik.cz, Productboard, Kiwi.com, Notino
+**Jobs (5–8 seeded, Status = Approved):**
+- "Account Executive – SaaS" · Productboard · Praha · Hybrid · 55 000–75 000 Kč
+- "Obchodní zástupce B2B" · Alza.cz · Praha · On-site · 45 000 Kč + provize
+- "Sales Development Representative" · Kiwi.com · Remote · 40 000–50 000 Kč
+- "Key Account Manager" · Rohlik.cz · Praha · Hybrid · 60 000 Kč
+- "Obchodník – kosmetika B2B" · Notino · Brno · On-site · 42 000 Kč
+- One seeded job with `Status = Pending` to demo the admin workflow live.
+
+**Applications:** 2–3 seeded sample applications linked to one job, with realistic Czech names, real-looking (fake) LinkedIn URLs, and a placeholder CV file, so the Admin Applications view isn't empty on first look.
+
+---
+
+## 7. Database Structure (Softr Native Database)
+
+**Companies**
+- name, website, logo (optional), contact_email
+
+**Jobs**
+- title, company (link to Companies), location, work_type (Remote/Hybrid/On-site), salary (text, optional), description (rich text), requirements (rich text), benefits (rich text, optional), contact_email, status (Pending/Approved/Rejected), date_posted (auto)
+
+**Applications**
+- job (link to Jobs), name, email, phone, linkedin_url, cv_file (attachment), message, date_applied (auto)
+
+Relationships: Jobs → Companies (one-to-many), Applications → Jobs (one-to-many). This matches the client's explicit "no complex ATS" instruction — just three linked tables.
+
+---
+
+## 8. Notifications (Native Softr Automations)
+
+- **On new Jobs record created** → email to Admin: "Nová pozice čeká na schválení: [job title] – [company]"
+- **On new Applications record created** → email to the Job's `contact_email`: "Nová žádost na pozici [job title]: [candidate name]"
+
+Both built with Softr's native "Send email when record is created" automation — no custom code required.
+
+---
+
+## 9. Component Inventory
+
+| Component | Purpose | States |
+|---|---|---|
+| Job Card | Summary in lists | default, hover (subtle shadow lift + border color shift), clicked |
+| Status Badge | Pending/Approved/Rejected, Remote/Hybrid/On-site | color-coded per §3 |
+| Search/Filter Bar | Keyword + location + work-type filtering | default, active filter, cleared |
+| Application Form | Candidate apply | default, validating, loading, success, error |
+| Job Submission Form | Employer submit | default, validating, loading, success, error |
+| CTA Button (primary/secondary) | All conversions | default, hover, active/pressed, disabled |
+| Admin Action Buttons | Approve/Reject | default, hover, confirmed (brief inline checkmark) |
+| Empty State Block | No jobs / no results | icon + message + optional reset action |
+
+---
+
+## 10. Micro-interactions
+
+- **Buttons:** default → hover (slightly darker fill + 1px lift, 150ms ease-out) → press (scale 0.98) → loading (spinner replaces label) → success (brief checkmark flash before reverting, on form submits only)
+- **Job Card:** default → hover (shadow appears, border shifts to Primary at 20% opacity, 150ms) — no scale/tilt gimmicks
+- **Inputs:** default → focus (border → Primary, subtle glow ring) → filled → error (border → Error, helper text appears) → success (border → Success, on valid CV upload)
+- **Filter chips:** default → active (filled Primary bg, white text)
+
+All transitions use `opacity`/`transform`/`border-color` only — no layout-shifting animations, per performance requirements even though Softr handles most of this natively.
+
+---
+
+## 11. Responsive Behavior
+
+| Breakpoint | Key changes |
+|---|---|
+| Mobile (<480px) | Single column, sticky bottom "Podat žádost" / "Zadat pozici" bar on relevant pages, hamburger nav, filters in bottom-sheet |
+| Large mobile (480–767px) | Same as above, slightly larger touch targets |
+| Tablet (768–1023px) | 2-column job list, filter bar becomes horizontal scroll row |
+| Laptop (1024–1439px) | 2–3 column job list, sticky right-rail CTA on Job Detail |
+| Desktop (1440px+) | Full layout, max content width ~1200px centered, generous side margins |
+
+All handled via Softr's native responsive controls per block — no custom CSS breakpoints needed except where a native block genuinely lacks a control (flag and note if encountered).
+
+---
+
+## 12. Content Strategy (Czech Copy Samples)
+
+- Hero H1: "Najděte svou další sales pozici."
+- Hero sub: "Jednoduchý pracovní portál zaměřený výhradně na obchod a business development v Česku."
+- Primary CTA: "Procházet pozice"
+- Employer CTA: "Zadat pozici"
+- Empty listings: "Momentálně nemáme žádné aktivní pozice. Zkuste to prosím později."
+- Application success: "Děkujeme! Vaše žádost byla odeslána."
+- Job submission success: "Děkujeme! Vaše pozice byla odeslána ke schválení."
+- Form error (generic): "Něco se nepovedlo. Zkuste to prosím znovu."
+
+No generic filler like "Zažijte budoucnost náboru" — copy stays specific and grounded.
+
+---
+
+## 13. "Wow Moments" for the Client Review
+
+1. **Live filtering on Job Listings** — client types a keyword, list updates instantly with zero page reload. Proves real functional search, not a static page.
+2. **End-to-end moderation loop** — client submits a test job via the public form, then opens Admin and sees it sitting as "Pending," clicks Approve, and watches it appear live on `/prace`. This single moment proves the entire core business workflow works.
+3. **No-account application with real CV upload** — client applies to a job as a "candidate," uploads a file, and immediately sees it appear in the Admin Applications view. Removes any doubt that the form is decorative.
+4. **Working email notifications** — client receives an actual email the moment they submit a test job. Concrete, not promised.
+5. **Fully responsive Admin on mobile** — client checks the demo on their phone and can still approve/reject jobs, proving it's not a "desktop-only backend."
+
+Each of these is a genuine functional proof, not a visual flourish — appropriate given the client explicitly asked for a working MVP, not eye-candy.
+
+---
+
+## 14. QA / Acceptance Checklist
+
+- [ ] All 7 pages built and linked correctly
+- [ ] Jobs table, Companies table, Applications table linked correctly
+- [ ] Employer submission creates Pending job, invisible on public listings
+- [ ] Admin can Approve/Reject/Edit/Delete jobs
+- [ ] Approved jobs (only) appear on Homepage + Listings
+- [ ] Candidate can apply without account, CV uploads correctly, appears in Admin
+- [ ] Search/filter on Listings works live
+- [ ] Admin + employer notification emails fire correctly
+- [ ] All UI copy is in Czech, no leftover Lorem Ipsum or English strings
+- [ ] Fully responsive: mobile, tablet, desktop — no horizontal scroll anywhere
+- [ ] No fake testimonials/statistics anywhere (explicit client requirement)
+- [ ] No accounts, payments, chat, AI-matching present anywhere (explicit exclusions)
+- [ ] Site built inside client's own Softr workspace/account, not freelancer's
+- [ ] Custom domain (saleshire.cz) connected and working
+- [ ] Short handover doc/video showing how to manage jobs + applications
+
+---
+
+## BUILD INSTRUCTIONS FOR THE SOFTR BUILDER / AI CODING AGENT
+
+1. Read this entire PRD before starting.
+2. Set up the Softr Database first: Companies, Jobs, Applications, with the fields and relationships in §7.
+3. Seed mock data from §6 so the demo never looks empty.
+4. Build pages in this order: Homepage → Job Listings → Job Detail → Submit a Job → For Employers → Admin.
+5. Use native Softr blocks for every list, filter, form, and action button described above.
+6. Wire the Approve/Reject admin actions as native "update record" button actions — do not use custom code for this.
+7. Set up the two native email automations from §8.
+8. Apply the color, type, and spacing tokens from §3 consistently across every page via Softr's Style settings — do not let default Softr theme colors leak through anywhere.
+9. Test the full loop yourself: submit a job → approve it → see it live → apply as a candidate → confirm it shows in Admin → confirm both emails fire.
+10. Check every page on mobile before calling it done.
+11. Do not add anything from the "IMPORTANT – DO NOT ADD" list in the client brief, even if it would be easy to add.
+12. Build directly inside the client's own Softr workspace, not a personal/freelancer account, per the client's ownership requirement.
+
+**Do not take shortcuts because this is "just an MVP."** The client will judge the freelancer's competence by whether the workflow (Pending → Approve → Live) actually works end to end, not by decoration.
+
+---
+
+## FINAL CLIENT WOW CHECK
+
+- **First 5 seconds:** Clean Czech-language hero, obviously built for this specific niche (sales jobs), not a generic template — client thinks "this is actually for us."
+- **First 30 seconds:** Client sees real job listings, tries the search, opens a job detail — understands the product works.
+- **First 2 minutes:** Client submits a test job, checks Admin, approves it, sees it go live, maybe applies as a fake candidate — experiences the entire core loop firsthand.
+- **Emotional impression:** Relief and confidence — "this person actually understood my workflow, not just my color scheme."
+- **Business impression:** This freelancer can deliver a working MVP without overengineering, matching the client's explicit "don't overbuild this" instruction.
+- **Technical impression:** Everything is native Softr, so it will be easy for another freelancer to maintain later, exactly as required.
+- **Design impression:** Calm, professional, blue/white, trustworthy — appropriate for a recruitment product, not flashy or templated.
+
+**Risk to avoid:** don't over-polish this into something that looks like a venture-funded SaaS startup — the client explicitly wants simple and maintainable. Keep animation and visual flourish minimal; let the working moderation workflow be the actual "wow moment," not motion design.
